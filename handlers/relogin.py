@@ -42,9 +42,9 @@ async def cmd_relogin(message: Message, state: FSMContext):
         await message.answer(text=msg, reply_markup=keyboard_markup)
 
     msg = """'↪️ Авторизация на сайте SKYCRYPTO.
-Приготовьтесь вводить ник, E-mail, пароль.
+Приготовьтесь вводить E-mail и пароль.
 Если установлен код из Google Authentificator!"""
     await message.answer(text=msg)
-    msg = 'Введите Ваш ник в SKYCRYPTO (начинается с /u):'
+    msg = 'Введите Ваш E-mail:'
     await message.answer(text=msg)
-    await state.set_state(state=AuthStates.nickname)
+    await state.set_state(state=AuthStates.email)

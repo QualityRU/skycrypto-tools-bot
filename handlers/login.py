@@ -12,6 +12,7 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
 )
+import jwt
 
 import config
 import libs.db as db
@@ -71,39 +72,11 @@ async def cmd_login(message: Message, state: FSMContext):
         return
 
     msg = """↪️ Авторизация на сайте SKYCRYPTO.
-Приготовьтесь вводить ник, E-mail, пароль.
+Приготовьтесь вводить E-mail и пароль.
 Если установлен код из Google Authentificator!"""
     await message.answer(text=msg)
-    msg = 'Введите Ваш ник в SKYCRYPTO <u>(начинается с /u)</u>:'
-    await message.answer(text=msg)
-    await state.set_state(state=AuthStates.nickname)
-
-
-@router.message(AuthStates.nickname, access)
-async def ask_login_nickname(message: Message, state: FSMContext):
-    await SendChatAction(
-        chat_id=message.from_user.id, action=ChatAction.TYPING
-    )
-    if message.from_user.username:
-        username = f'@{message.from_user.username}'
-    else:
-        username = message.from_user.first_name
-
-    nickname = message.text
-
-    if not nickname.startswith('/u'):
-        msg = """❗️ Ник должен начинаться с /u.
-Это точно Ваш ник в официальном боте SKYCRYPTO?
-Введите заново Ваш ник:"""
-        await message.answer(text=msg)
-        return
-
-    nickname = nickname.split('/u')[1]
-    await state.update_data(nickname=nickname)
     msg = 'Введите Ваш E-mail:'
     await message.answer(text=msg)
-    await state.update_data(telegram_username=username)
-    await state.update_data(telegram_id=message.from_user.id)
     await state.set_state(state=AuthStates.email)
 
 
@@ -112,6 +85,10 @@ async def ask_login_email(message: Message, state: FSMContext):
     await SendChatAction(
         chat_id=message.from_user.id, action=ChatAction.TYPING
     )
+    if message.from_user.username:
+        username = f'@{message.from_user.username}'
+    else:
+        username = message.from_user.first_name
     email = message.text.split('@')
 
     if len(email) != 2:
@@ -126,6 +103,8 @@ async def ask_login_email(message: Message, state: FSMContext):
     await state.update_data(email=email)
     msg = 'Введите Ваш пароль:'
     await message.answer(text=msg)
+    await state.update_data(telegram_username=username)
+    await state.update_data(telegram_id=message.from_user.id)
     await state.set_state(state=AuthStates.password)
 
 
@@ -169,12 +148,11 @@ async def process_login(message: Message, state: FSMContext):
     auth_data = await state.get_data()
 
     telegram_id = auth_data.get('telegram_id')
-    nickname = auth_data.get('nickname')
     email = auth_data.get('email')
     password = auth_data.get('password')
     code = auth_data.get('code')
 
-    if not nickname and not email and not password:
+    if not email and not password:
         ReplyKeyboardRemove()
         keyboard_markup = ReplyKeyboardMarkup(
             one_time_keyboard=True,
@@ -194,8 +172,8 @@ async def process_login(message: Message, state: FSMContext):
 
     if tokens[0].get('request_code'):
         msg = """Введите код из Google Authentificator
-для /u{nickname} ({email}):""".format(
-            nickname=nickname, email=email
+для {email}:""".format(
+            email=email
         )
         await message.answer(text=msg)
         await state.set_state(state=AuthStates.code)
@@ -203,7 +181,6 @@ async def process_login(message: Message, state: FSMContext):
 
     if tokens[0].get('status') == 'Error':
         if tokens[0].get('description'):
-            # description = json_loads(tokens[0].get('description'))
             description = tokens[0].get('description').split("',")
             detail = description[0].replace("{'detail': '", '')
             Logger.debug(msg=description)
@@ -220,13 +197,20 @@ async def process_login(message: Message, state: FSMContext):
                 msg = tokens[0].get('description')
         else:
             msg = str(tokens[0])
-        msg = f'{msg}\n\nВведите заново Ваш ник:'
+        msg = f'{msg}\n\nВведите заново Ваш email:'
         await message.answer(text=msg)
-        await state.set_state(state=AuthStates.nickname)
+        await state.set_state(state=AuthStates.email)
         return
 
     if tokens[0].get('access') and tokens[0].get('refresh'):
         await state.update_data(tokens=tokens[0])
+
+    jwt_decode = jwt.decode(
+        jwt=tokens[0].get('access'),
+        algorithms=['HS256'],
+        options={'verify_signature': False},
+    )
+    await state.update_data(nickname=jwt_decode.get('nickname'))
 
     msg = '✅ Успешная авторизация! Загружаю данные!'
     await message.answer(text=msg)
