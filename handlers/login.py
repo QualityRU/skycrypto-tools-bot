@@ -1,6 +1,7 @@
 from logging import getLogger
 from secrets import token_hex
 
+import jwt
 from aiogram import F, Router
 from aiogram.enums.chat_action import ChatAction
 from aiogram.filters import Command
@@ -12,7 +13,6 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove,
 )
-import jwt
 
 import config
 import libs.db as db
@@ -205,12 +205,12 @@ async def process_login(message: Message, state: FSMContext):
     if tokens[0].get('access') and tokens[0].get('refresh'):
         await state.update_data(tokens=tokens[0])
 
-    jwt_decode = jwt.decode(
+    parse_jwt = jwt.decode(
         jwt=tokens[0].get('access'),
         algorithms=['HS256'],
         options={'verify_signature': False},
     )
-    await state.update_data(nickname=jwt_decode.get('nickname'))
+    await state.update_data(nickname=parse_jwt.get('nickname'))
 
     msg = '✅ Успешная авторизация! Загружаю данные!'
     await message.answer(text=msg)

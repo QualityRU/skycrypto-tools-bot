@@ -35,11 +35,16 @@ async def cmd_relogin(message: Message, state: FSMContext):
     )
     if auth_data.get('loggined'):
         await state.update_data(loggined=False)
-        await state.update_data(task_lots=False)
-        await state.update_data(code=None)
         msg = """⛔️ Вы вышли с сайта SKYCRYPTO
 Вернуться в главное меню: <b>/menu</b>"""
         await message.answer(text=msg, reply_markup=keyboard_markup)
+
+    await state.update_data(tokens=False)
+    await state.update_data(nickname=False)
+    await state.update_data(email=False)
+    await state.update_data(password=False)
+    await state.update_data(task_lots=False)
+    await state.update_data(code=None)
 
     msg = """'↪️ Авторизация на сайте SKYCRYPTO.
 Приготовьтесь вводить E-mail и пароль.
