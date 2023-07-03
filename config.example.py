@@ -14,7 +14,7 @@ SKYCRYPTO_URL = 'skycrypto.me'
 SKYCRYPTO_SSL = False  # True
 SKYCRYPTO_DEBUG = True  # False
 SKYCRYPTO_TIME_DELAY = (0.3, 0.6)  # seconds
-SKYCRYPTO_REFRESH_TOKEN = (9, 12)  # minutes
+SKYCRYPTO_REFRESH_TOKEN = (4, 4.3)  # minutes
 SKYCRYPTO_REFRESH_GET_LOTS_MARKET = (1.5, 3)  # seconds
 SKYCRYPTO_REFRESH_SET_DEALS = (1.5, 3)  # seconds
 SKYCRYPTO_REFRESH_DEALS = 25  # seconds
@@ -27,7 +27,7 @@ SKYCRYPTO_BANKS_DICT = {
     'QIWI': '🟠',
     'Сбербанк': '🟢',
     'Тинькофф': '🟡',
-    'С карты на карту': '⚪️',
+    'С карты на карту': '⚪',
     'Яндекс.Деньги': '🟣',
     'Любой банк РФ': '🔘',
     'Пополнение телефона': '🟤',
@@ -36,16 +36,36 @@ SKYCRYPTO_BANKS_DICT = {
     'ВТБ 24': '🔵',
     'VISA': '🔘',
     'Райффайзен': '🟡',
-    'МТС-банк': '🔴',
     'PAYEER': '🟢',
     'Почта банк': '🔵',
     'WebMoney': '🔵',
     'Промсвязьбанк': '🟣',
-    'Другие способы': '⚫️',
-    'Наличные в ATM': '⚫️',
-    'МИР': '🟢',
+    'Другие способы': '⚫',
+    'Наличные в ATM': '⚫',
+    'Рокетбанк': '',
+    'МТС-банк': '🔴',
+    'OZON Банк': '🔵',
+    'Ак Барс Банк': '',
+    'Русский Стандарт': '🔴',
+    'UnionPay': '',
+    'Банк Москвы': '',
+    'Наличные (QR)': '',
     'СБП (банк-банк)': '🟢',
+    'Открытие': '',
+    'Кукуруза': '',
+    'Авангард': '',
+    'Advanced Cash': '',
+    'Газпромбанк': '',
+    'Touch банк': '',
+    'Золотая корона': '',
+    'Безнал (юр.лица)': '',
+    'Citibank': '',
+    'LiqPAY': '',
     'Росбанк': '🔴',
+    'Уральский банк': '',
+    'Совкомбанк': '',
+    'ЮMoney': '',
+    'МИР': '🟢',
 }
 RECAPCHA_ACHOR = {
     'ar': '1',

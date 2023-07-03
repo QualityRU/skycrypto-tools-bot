@@ -1,5 +1,5 @@
 **pip install aiogram -U --pre**
-**pip install aiohttp[speedups] coloredlogs sqlalchemy[asyncio] python-dotenv ujson uvloop** chardet quickjs aiologger nodejs-bin
+**pip install aiohttp[speedups] coloredlogs sqlalchemy[asyncio] python-dotenv ujson uvloop PyJWT** chardet quickjs aiologger nodejs-bin
 
 переименовать **config.example.py** в **config.py** и заполнить его
 

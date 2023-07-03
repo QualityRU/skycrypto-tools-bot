@@ -42,16 +42,6 @@ async def cmd_spam(message: Message, state: FSMContext):
         await message.answer(text=msg, reply_markup=keyboard_markup)
         return
 
-    # ReplyKeyboardRemove()
-    # keyboard_markup = ReplyKeyboardMarkup(
-    #     one_time_keyboard=True,
-    #     resize_keyboard=True,
-    #     keyboard=[
-    #         [KeyboardButton(text="/menu")],
-    #         [KeyboardButton(text="/relogin"), KeyboardButton(text="/help")],
-    #     ],
-    # )
-
     lots_my = await skycrypto.lots(
         tokens=tokens, lot_type='sell', currency='rub'
     )

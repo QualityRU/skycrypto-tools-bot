@@ -1,84 +1,58 @@
-from asyncio import TimeoutError, create_task, gather, sleep
-
-# from quickjs import Function as eval_js
-# from os import path
+from asyncio import create_task, gather, sleep
 from hashlib import md5
 from logging import getLogger
 from random import uniform
 from re import compile
 from urllib import parse
 
-from aiohttp import (
-    ClientConnectorError,
-    ClientError,
-    ClientSession,
-    CookieJar,
-    TCPConnector,
-)
-
-# from json import loads as json_loads
+from aiohttp import ClientError, ClientSession, CookieJar, TCPConnector
 from ujson import loads as json_loads
 
 import config
 
 
 async def fetch(
-    session,
-    url,
-    json=None,
-    data=None,
-    patch=False,
-    result_text=True,
-    verify_ssl=True,
+    session, url, json=None, data=None, patch=False, result_text=True
 ):
-    log_msg = 'None'
-
-    if json and not patch or data and not patch:
-        usession = session.post
-    elif json and patch:
-        usession = session.patch
-    else:
-        usession = session.get
-
     try:
-        async with usession(
-            url=url, json=json, data=data, verify_ssl=verify_ssl
+        async with session.request(
+            method='GET'
+            if not json and not data
+            else 'POST'
+            if not patch
+            else 'PATCH',
+            url=url,
+            json=json,
+            data=data,
+            ssl=config.SKYCRYPTO_SSL,
         ) as response:
             if not response.ok:
-                result = dict(
-                    status='Error',
-                    description=str(await response.json(loads=json_loads)),
-                )
+                result = {
+                    'status': 'Error',
+                    'description': str(await response.json(loads=json_loads)),
+                }
             else:
-                if result_text:
-                    result = await response.text()
-                else:
-                    result = await response.json(loads=json_loads)
-
-                log_msg = '{url}:{port}, {status}, {method}'.format(
-                    url=response.url,
-                    port=response.url.port,
-                    status=response.status,
-                    method=response.method,
+                result = await (
+                    response.text()
+                    if result_text
+                    else response.json(loads=json_loads)
                 )
-                await session.close()
-    except ClientConnectorError as e:
-        result = dict(
-            status='Error', description='ClientConnectorError: {e}'.format(e=e)
-        )
+
+            log_msg = f'{response.url}:{response.url.port}, {response.status}, {response.method}'
     except ClientError as e:
-        result = dict(
-            status='Error', description='ClientError: {e}'.format(e=e)
-        )
-    except TimeoutError as e:
-        result = dict(
-            status='Error', description='TimeoutError: {e}'.format(e=e)
-        )
+        result = {
+            'status': 'Error',
+            'description': f'{type(e).__name__}: {e}',
+        }
     except Exception as e:
-        result = dict(status='Error', description='Exception: {e}'.format(e=e))
+        result = {
+            'status': 'Error',
+            'description': f'{type(e).__name__}: {e}',
+        }
 
     if config.SKYCRYPTO_DEBUG:
         getLogger(name=__name__).debug(msg=log_msg)
+
     return result
 
 
@@ -90,9 +64,8 @@ async def skycrypto(
     patch=False,
     result_text=False,
 ):
-    a, b = config.SKYCRYPTO_TIME_DELAY
-    time_sleep = uniform(a=a, b=b)
-    await sleep(time_sleep)
+    time_delay = uniform(*config.SKYCRYPTO_TIME_DELAY)
+    await sleep(time_delay)
 
     async with ClientSession(
         headers=headers,
@@ -108,7 +81,6 @@ async def skycrypto(
                     data=data,
                     patch=patch,
                     result_text=result_text,
-                    verify_ssl=config.SKYCRYPTO_SSL,
                 )
             )
             for url in urls
