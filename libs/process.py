@@ -100,7 +100,7 @@ async def lots_answer_message(message: Message, state: FSMContext):
     if lots_my[0]:
         return
 
-    for lot in lots_my[1]:
+    for lot in lots_my[1].get('data'):
         auth_state = await state.get_data()
         tokens = auth_state.get('tokens')
 
@@ -145,7 +145,7 @@ async def lots_answer_message(message: Message, state: FSMContext):
     ids_added = list()
     rate_market_dict = dict()
 
-    for lot in lots_my[1]:
+    for lot in lots_my[1].get('data'):
         if not lot:
             continue
         broker_id = lot.get('broker').get('id')
