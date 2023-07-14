@@ -278,7 +278,9 @@ async def lots_answer_message(message: Message, state: FSMContext):
                     details=details,
                 )
                 result = result[0]
-
+            
+            if not result.get('success'):
+                continue
             result = result.get('success').replace(
                 'lot updated', '♻️ Лот обновлен'
             )
