@@ -44,11 +44,13 @@ async def fetch(
             'status': 'Error',
             'description': f'{type(e).__name__}: {e}',
         }
+        log_msg = result
     except Exception as e:
         result = {
             'status': 'Error',
             'description': f'{type(e).__name__}: {e}',
         }
+        log_msg = result
 
     if config.SKYCRYPTO_DEBUG:
         getLogger(name=__name__).debug(msg=log_msg)
