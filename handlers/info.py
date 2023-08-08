@@ -1,8 +1,8 @@
 from aiogram import F, Router
-from aiogram.enums.chat_action import ChatAction
+
+# from aiogram.enums.chat_action import ChatAction
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.methods import SendChatAction
 from aiogram.types import (
     KeyboardButton,
     Message,
@@ -19,9 +19,9 @@ access = F.from_user.id.in_(config.ACCESS_IDS)
 
 @router.message(Command(commands=['info']), access)
 async def cmd_info(message: Message, state: FSMContext):
-    await SendChatAction(
-        chat_id=message.from_user.id, action=ChatAction.TYPING
-    )
+    # result: bool = await bot.send_chat_action(
+    #     chat_id=message.from_user.id, action=ChatAction.TYPING
+    # )
     auth_data = await state.get_data()
     nickname = auth_data.get('nickname')
     tokens = [auth_data.get('tokens')]

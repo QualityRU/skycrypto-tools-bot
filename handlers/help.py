@@ -1,7 +1,7 @@
 from aiogram import F, Router
-from aiogram.enums.chat_action import ChatAction
+
+# from aiogram.enums.chat_action import ChatAction
 from aiogram.filters import Command
-from aiogram.methods import SendChatAction
 from aiogram.types import (
     KeyboardButton,
     Message,
@@ -17,9 +17,9 @@ access = F.from_user.id.in_(config.ACCESS_IDS)
 
 @router.message(Command(commands=['help']), access)
 async def cmd_help(message: Message):
-    await SendChatAction(
-        chat_id=message.from_user.id, action=ChatAction.TYPING
-    )
+    # result: bool = await bot.send_chat_action(
+    #     chat_id=message.from_user.id, action=ChatAction.TYPING
+    # )
 
     ReplyKeyboardRemove()
     keyboard_markup = ReplyKeyboardMarkup(

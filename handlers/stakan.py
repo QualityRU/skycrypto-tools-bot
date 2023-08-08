@@ -1,8 +1,8 @@
 from aiogram import F, Router
-from aiogram.enums.chat_action import ChatAction
+
+# from aiogram.enums.chat_action import ChatAction
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.methods import SendChatAction
 from aiogram.types import (
     KeyboardButton,
     Message,
@@ -20,9 +20,9 @@ access = F.from_user.id.in_(config.ACCESS_IDS)
 
 @router.message(Command(commands=['restakan']), access)
 async def cmd_restakan(message: Message, state: FSMContext):
-    await SendChatAction(
-        chat_id=message.from_user.id, action=ChatAction.TYPING
-    )
+    # result: bool = await bot.send_chat_action(
+    #     chat_id=message.from_user.id, action=ChatAction.TYPING
+    # )
     auth_data = await state.get_data()
     tokens = [auth_data.get('tokens')]
     task_lots = auth_data.get('task_lots')
@@ -65,9 +65,9 @@ async def cmd_restakan(message: Message, state: FSMContext):
 
 @router.message(Command(commands=['stakan']), access)
 async def cmd_stakan(message: Message, state: FSMContext):
-    await SendChatAction(
-        chat_id=message.from_user.id, action=ChatAction.TYPING
-    )
+    # result: bool = await bot.send_chat_action(
+    #     chat_id=message.from_user.id, action=ChatAction.TYPING
+    # )
     auth_data = await state.get_data()
     tokens = [auth_data.get('tokens')]
     task_lots = auth_data.get('task_lots')
@@ -108,9 +108,9 @@ async def cmd_stakan(message: Message, state: FSMContext):
 
 @router.message(AuthStates.rate_buy_btc, access)
 async def ask_rate_buy_btc(message: Message, state: FSMContext):
-    await SendChatAction(
-        chat_id=message.from_user.id, action=ChatAction.TYPING
-    )
+    # result: bool = await bot.send_chat_action(
+    #     chat_id=message.from_user.id, action=ChatAction.TYPING
+    # )
     try:
         rate_buy_btc = float(message.text)
     except Exception:
@@ -127,9 +127,9 @@ async def ask_rate_buy_btc(message: Message, state: FSMContext):
 
 @router.message(AuthStates.rate_buy_usdt, access)
 async def ask_rate_buy_usdt(message: Message, state: FSMContext):
-    await SendChatAction(
-        chat_id=message.from_user.id, action=ChatAction.TYPING
-    )
+    # result: bool = await bot.send_chat_action(
+    #     chat_id=message.from_user.id, action=ChatAction.TYPING
+    # )
     ReplyKeyboardRemove()
     keyboard_markup = ReplyKeyboardMarkup(
         one_time_keyboard=True,

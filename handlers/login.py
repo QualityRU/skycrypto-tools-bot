@@ -3,10 +3,10 @@ from secrets import token_hex
 
 import jwt
 from aiogram import F, Router
-from aiogram.enums.chat_action import ChatAction
+
+# from aiogram.enums.chat_action import ChatAction
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.methods import SendChatAction
 from aiogram.types import (
     KeyboardButton,
     Message,
@@ -28,9 +28,9 @@ Logger = getLogger(name=__name__)
 
 @router.message(Command(commands=['login']), access)
 async def cmd_login(message: Message, state: FSMContext):
-    await SendChatAction(
-        chat_id=message.from_user.id, action=ChatAction.TYPING
-    )
+    # result: bool = await bot.send_chat_action(
+    #     chat_id=message.from_user.id, action=ChatAction.TYPING
+    # )
     if message.from_user.username:
         username = f'@{message.from_user.username}'
     else:
@@ -82,9 +82,9 @@ async def cmd_login(message: Message, state: FSMContext):
 
 @router.message(AuthStates.email, access)
 async def ask_login_email(message: Message, state: FSMContext):
-    await SendChatAction(
-        chat_id=message.from_user.id, action=ChatAction.TYPING
-    )
+    # result: bool = await bot.send_chat_action(
+    #     chat_id=message.from_user.id, action=ChatAction.TYPING
+    # )
     if message.from_user.username:
         username = f'@{message.from_user.username}'
     else:
@@ -110,9 +110,9 @@ async def ask_login_email(message: Message, state: FSMContext):
 
 @router.message(AuthStates.password, access)
 async def ask_login_password(message: Message, state: FSMContext):
-    await SendChatAction(
-        chat_id=message.from_user.id, action=ChatAction.TYPING
-    )
+    # result: bool = await bot.send_chat_action(
+    #     chat_id=message.from_user.id, action=ChatAction.TYPING
+    # )
     password = message.text
 
     if len(password) < 8:
@@ -127,9 +127,9 @@ async def ask_login_password(message: Message, state: FSMContext):
 
 @router.message(AuthStates.code, access)
 async def ask_login_code(message: Message, state: FSMContext):
-    await SendChatAction(
-        chat_id=message.from_user.id, action=ChatAction.TYPING
-    )
+    # result: bool = await bot.send_chat_action(
+    #     chat_id=message.from_user.id, action=ChatAction.TYPING
+    # )
     code = message.text
 
     if not code.isdigit():
@@ -142,9 +142,9 @@ async def ask_login_code(message: Message, state: FSMContext):
 
 
 async def process_login(message: Message, state: FSMContext):
-    await SendChatAction(
-        chat_id=message.from_user.id, action=ChatAction.TYPING
-    )
+    # result: bool = await bot.send_chat_action(
+    #     chat_id=message.from_user.id, action=ChatAction.TYPING
+    # )
     auth_data = await state.get_data()
 
     telegram_id = auth_data.get('telegram_id')
