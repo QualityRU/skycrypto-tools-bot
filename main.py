@@ -4,6 +4,7 @@ from os import path
 from sys import version_info
 
 from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand, BotCommandScopeChat
 from coloredlogs import install as color_install
@@ -28,7 +29,10 @@ async def set_bot_commands(bot: Bot) -> None:
 
 
 async def main():
-    bot = Bot(token=config.TELEGRAM_TOKEN, parse_mode=config.PARSE_MODE)
+    bot = Bot(
+        token=config.TELEGRAM_TOKEN,
+        default=DefaultBotProperties(parse_mode='HTML'),
+    )
     dp = Dispatcher(storage=MemoryStorage())
     include_router(dp=dp)
     # await set_bot_commands(bot=bot)

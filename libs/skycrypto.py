@@ -101,23 +101,24 @@ async def auth_login(email: str, password: str, code: str = ''):
 
 async def codedata(tokens: list):
     """
-    function generateSecretKey(): string {
-      if (secretKey) {
-        return secretKey;
-      }
-      if (!codeData) {
-        return '';
-      }
-
-      const needReverse = codeData['aKM'] === 'e';
-      const md5 = new Md5();
-      let codedataKeys = Object.keys(codeData).sort();
-      needReverse && (codedataKeys = codedataKeys.reverse());
-
-      const codedataValues = codedataKeys.map((key) => codeData?.[key]);
-      const result = codedataValues.join('') + 'l';
-      secretKey = md5.appendStr(result).end() as string;
-      return secretKey;"""
+    if (status === 412) {
+      if (!isRefreshingSecret) {
+        isRefreshingSecret = true;
+        getCodeData()
+          .then((codeData) => {
+            isRefreshingSecret = false;
+            const needReverse = codeData['aKM'] === 'e';
+            const md5 = new Md5();
+            let codedataKeys = Object.keys(codeData).sort();
+            needReverse && (codedataKeys = codedataKeys.reverse());
+            const codedataValues = codedataKeys.map((key) => codeData[key]);
+            const result = codedataValues.join('') + 'lsc';
+            Secret = md5.appendStr(result).end() as string;
+            onSecretRefreshed(Secret);
+            refreshSubscribers = [];
+          })
+          .catch(() => (isRefreshingSecret = false));
+      }"""
 
     access_token = tokens[0].get('access')
     headers = {
@@ -129,7 +130,7 @@ async def codedata(tokens: list):
     codedata_dict = await skycrypto(headers=headers, urls=urls)
     need_reverse = codedata_dict[0].get('aKM') == 'e'
     codedata = dict(sorted(codedata_dict[0].items(), reverse=need_reverse))
-    codedata = f'{"".join(codedata.values())}l'
+    codedata = f'{"".join(codedata.values())}lsc'
 
     if not codedata:
         return ''
@@ -296,7 +297,7 @@ async def lots(
     headers = {
         'AuthKey': authkey,
         'Authorization': f'Bearer {access_token}',
-        'Content-Type': 'application/json;charset=utf-8',
+        'Accept': 'application/json, text/plain, */*',
         'User-Agent': config.USER_AGENT,
     }
     lot_type_list = ('sell', 'buy', 'all')
