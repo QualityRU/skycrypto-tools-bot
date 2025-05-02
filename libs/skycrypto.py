@@ -281,6 +281,20 @@ async def user_messages(tokens: list, with_user: str = 'SUPPORT'):
     return await skycrypto(headers=headers, urls=urls)
 
 
+async def lot_id(tokens: list, iid: str):
+    access_token = tokens[0].get('access')
+    authkey = await codedata(tokens=tokens)
+    headers = {
+        'AuthKey': authkey,
+        'Authorization': f'Bearer {access_token}',
+        'Accept': 'application/json, text/plain, */*',
+        'User-Agent': config.USER_AGENT,
+    }
+    urls = f'https://api.{config.SKYCRYPTO_URL}/rest/v1/lots/{iid}'
+
+    return await skycrypto(headers=headers, urls=[urls])
+
+
 async def lots(
     tokens: list,
     market: bool = False,

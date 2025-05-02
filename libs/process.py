@@ -100,42 +100,30 @@ async def lots_answer_message(message: Message, state: FSMContext):
     if lots_my[0]:
         return
 
-    for lot in lots_my[1].get('data'):
+    for broker_lot in lots_my[1].get('data'):
         auth_state = await state.get_data()
         tokens = auth_state.get('tokens')
+        iid = broker_lot.get('id')
+        lots_ids = await skycrypto.lot_id([tokens], iid=iid)
 
         a, b = config.SKYCRYPTO_REFRESH_GET_LOTS_MARKET
         time_sleep = uniform(a=a, b=b)
         await sleep(time_sleep)
 
-        is_active = lot.get('is_active')
-        broker = lot.get('broker').get('name')
-        symbol = lot.get('symbol')
-        currency = lot.get('currency')
-        lot_type = lot.get('type')
-
-        if not is_active:
-            continue
-
-        lots_market = await skycrypto.lots(
-            tokens=[tokens],
-            market=True,
-            symbol=symbol,
-            lot_type=lot_type,
-            currency=currency,
-            broker=broker,
-            limit=15,
-            offset=0,
-        )
-        lots_market = lots_market[0].get('data')
-
-        if lots_market:
-            if type(lots_market) == dict:
+        for lot in lots_ids:
+            is_active = lot.get('is_active')
+            if not is_active:
                 continue
-            for lot_market in lots_market:
-                if type(lot_market) == str:
+
+            lots_market = await skycrypto.lot_id([tokens], iid=iid)
+
+            if lots_market:
+                if type(lots_market) == dict:
                     continue
-                lots_market_massive.append(lot_market)
+                for lot_market in lots_market:
+                    if type(lot_market) == str:
+                        continue
+                    lots_market_massive.append(lot_market)
 
     spred = 1.0
     limit_to = 10000  # auth_state.get('limit_to_buy')
@@ -145,58 +133,63 @@ async def lots_answer_message(message: Message, state: FSMContext):
     ids_added = list()
     rate_market_dict = dict()
 
-    for lot in lots_my[1].get('data'):
-        if not lot:
+    for broker_lot in lots_my[1].get('data'):
+        if not broker_lot:
             continue
-        broker_id = lot.get('broker').get('id')
-        bank = lot.get('broker').get('name')
-        id_lot = lot.get('id')
-        symbol = lot.get('symbol')
-        rate = lot.get('rate')
-        typ = lot.get('type')
-        # limit_to = lot.get('limit_to')
-        is_active = lot.get('is_active')
+        iid = broker_lot.get('id')
+        lots_ids = await skycrypto.lot_id([tokens], iid=iid)
 
-        for lot_m in lots_market_massive:
-            bank_market = lot_m.get('broker').get('name')
-            id_lot_market = lot_m.get('id')
-            symbol_market = lot_m.get('symbol')
-            rate_market = lot_m.get('rate')
-            type_market = lot_m.get('type')
-            limit_to_market = lot_m.get('limit_to')
-            verified_market = lot_m.get('user').get('verified')
-            user_deals_market = lot_m.get('user').get('deals').get('deals')
+        for lot in lots_ids:
+            bank = lot.get('broker').get('name')
+            id_lot = lot.get('broker').get('id')
+            symbol = lot.get('symbol')
+            rate = lot.get('rate')
+            typ = lot.get('type')
+            # limit_to = lot.get('limit_to')
+            is_active = lot.get('is_active')
 
-            if not bank == bank_market:
-                continue
+            for lot_m in lots_market_massive:
+                bank_market = lot_m.get('broker').get('name')
+                id_lot_market = lot_m.get('broker').get('id')
+                symbol_market = lot_m.get('symbol')
+                rate_market = lot_m.get('rate')
+                type_market = lot_m.get('type')
+                limit_to_market = lot_m.get('limit_to')
+                # verified_market = lot_m.get('user').get('verified')
+                # user_deals_market = lot_m.get('user').get('deals').get('deals')
 
-            # and user_deals_market >= limit_deals \
-            # and rate != rate_market
-            # print(
-            #     'is_active=', is_active, 'verified_market=', verified_market,
-            #       id_lot, '!=', id_lot_market,
-            #       symbol, '==', symbol_market,
-            #       type_market, '==', typ, limit_to_market, '>=', limit_to),
-            if (
-                is_active
-                and verified_market
-                and id_lot != id_lot_market
-                and symbol == symbol_market
-                and type_market == typ
-                and limit_to_market >= limit_to
-            ):
-                if symbol not in rate_market_dict:
-                    rate_market_dict[symbol] = dict()
-                if bank not in rate_market_dict[symbol]:
-                    rate_market_dict[symbol][bank] = list()
-
-                rate_market_dict[symbol][bank].append(rate_market)
-
-                if id_lot in ids_added:
+                if not bank == bank_market:
                     continue
 
-                lots_update.append(lot)
-                ids_added.append(id_lot)
+                # and user_deals_market >= limit_deals \
+                # and rate != rate_market
+                # print(
+                #     'is_active=', is_active, 'verified_market=', verified_market,
+                #       id_lot, '!=', id_lot_market,
+                #       symbol, '==', symbol_market,
+                #       type_market, '==', typ, limit_to_market, '>=', limit_to),
+
+                if (
+                    is_active
+                    # and verified_market
+                    and id_lot != id_lot_market
+                    and symbol == symbol_market
+                    and type_market == typ
+                    # and limit_to_market <= limit_to
+                ):
+                    print('>>>>>>')
+                    if symbol not in rate_market_dict:
+                        rate_market_dict[symbol] = dict()
+                    if bank not in rate_market_dict[symbol]:
+                        rate_market_dict[symbol][bank] = list()
+
+                    rate_market_dict[symbol][bank].append(rate_market)
+
+                    if id_lot in ids_added:
+                        continue
+
+                    lots_update.append(lot)
+                    ids_added.append(id_lot)
 
     print('>>>', rate_market_dict)
     # print('>>>', lots_update)
