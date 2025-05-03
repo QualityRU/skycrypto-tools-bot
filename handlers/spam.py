@@ -54,7 +54,7 @@ async def cmd_spam(message: Message, state: FSMContext):
             lots_dict[symbol] = list()
         if bank not in lots_dict.get(symbol):
             lots_dict.get(symbol).append(bank)
-    print(lots_dict)
+
     msg = """<b>Выберите направление которое спамить.</b>
 Внимание! Данный раздел формируется на основании включенных лотов в ЛК!
 

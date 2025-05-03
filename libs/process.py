@@ -59,12 +59,9 @@ async def rates_task(state: FSMContext):
 
 async def refresh_tokens_coro(state: FSMContext):
     auth_state = await state.get_data()
-    print("auth_state.get('tokens')\n", auth_state.get('tokens'))
     if not auth_state.get('loggined'):
         return
     tokens = await skycrypto.auth_refresh(tokens=[auth_state.get('tokens')])
-
-    print('tokens\n', tokens)
 
     if tokens[0].get('access') and tokens[0].get('refresh'):
         await state.update_data(tokens=tokens[0])
@@ -112,10 +109,24 @@ async def lots_answer_message(message: Message, state: FSMContext):
 
         for lot in lots_ids:
             is_active = lot.get('is_active')
+            broker = lot.get('broker').get('name')
+            symbol = lot.get('symbol')
+            currency = lot.get('currency')
+            lot_type = lot.get('type')
             if not is_active:
                 continue
 
-            lots_market = await skycrypto.lot_id([tokens], iid=iid)
+            lots_market = await skycrypto.lots(
+                tokens=[tokens],
+                market=True,
+                symbol=symbol,
+                lot_type=lot_type,
+                currency=currency,
+                broker=broker,
+                limit=15,
+                offset=0,
+            )
+            lots_market = lots_market[0].get('data')
 
             if lots_market:
                 if type(lots_market) == dict:
@@ -123,6 +134,7 @@ async def lots_answer_message(message: Message, state: FSMContext):
                 for lot_market in lots_market:
                     if type(lot_market) == str:
                         continue
+                    lot_market['broker'] = broker
                     lots_market_massive.append(lot_market)
 
     spred = 1.0
@@ -149,35 +161,26 @@ async def lots_answer_message(message: Message, state: FSMContext):
             is_active = lot.get('is_active')
 
             for lot_m in lots_market_massive:
-                bank_market = lot_m.get('broker').get('name')
-                id_lot_market = lot_m.get('broker').get('id')
+                bank_market = lot_m.get('broker')
+                id_lot_market = lot_m.get('id')
                 symbol_market = lot_m.get('symbol')
                 rate_market = lot_m.get('rate')
                 type_market = lot_m.get('type')
                 limit_to_market = lot_m.get('limit_to')
-                # verified_market = lot_m.get('user').get('verified')
+                verified_market = lot_m.get('user').get('verified')
                 # user_deals_market = lot_m.get('user').get('deals').get('deals')
 
                 if not bank == bank_market:
                     continue
 
-                # and user_deals_market >= limit_deals \
-                # and rate != rate_market
-                # print(
-                #     'is_active=', is_active, 'verified_market=', verified_market,
-                #       id_lot, '!=', id_lot_market,
-                #       symbol, '==', symbol_market,
-                #       type_market, '==', typ, limit_to_market, '>=', limit_to),
-
                 if (
                     is_active
-                    # and verified_market
+                    and verified_market
                     and id_lot != id_lot_market
                     and symbol == symbol_market
                     and type_market == typ
-                    # and limit_to_market <= limit_to
+                    and limit_to_market >= limit_to
                 ):
-                    print('>>>>>>')
                     if symbol not in rate_market_dict:
                         rate_market_dict[symbol] = dict()
                     if bank not in rate_market_dict[symbol]:
@@ -190,9 +193,6 @@ async def lots_answer_message(message: Message, state: FSMContext):
 
                     lots_update.append(lot)
                     ids_added.append(id_lot)
-
-    print('>>>', rate_market_dict)
-    # print('>>>', lots_update)
 
     if lots_update and rate_market_dict:
         for lot in lots_update:
@@ -222,8 +222,6 @@ async def lots_answer_message(message: Message, state: FSMContext):
             else:
                 raise 'Нет такой криптовалюты'
 
-            print(bank, rate)
-
             if symbol not in rate_market_dict:
                 continue
 
@@ -234,14 +232,6 @@ async def lots_answer_message(message: Message, state: FSMContext):
             max_rate = max(rate_m_c.values())
             rate_m_final = {k: v for k, v in rate_m_c.items() if v == max_rate}
             rate_m_final = list(rate_m_final)[0]
-
-            # if rate > rate_m_final:
-            #     if rate_buy_plus_spread < rate_m_final:
-            #         rate_new = rate_m_final
-            #     else:
-            #         continue
-            # else:
-            #     continue
 
             if rate == rate_m_final:
                 continue
@@ -319,7 +309,6 @@ async def lots_coro(message: Message, state: FSMContext):
     else:
         await state.update_data(lots_my=lots_my)
 
-    # Logger.debug(msg=f'lots_my:\n{lots_my}')
     await lots_answer_message(message=message, state=state)
     create_task(
         coro=lots_task(message=message, state=state), name='lots_refresh'
@@ -360,7 +349,6 @@ async def deals_answer_message(
 
                 break
 
-    print(deals_change)
     msg = ''
 
     if deals_change:
@@ -407,7 +395,6 @@ async def deals_coro(message: Message, state: FSMContext):
     else:
         await state.update_data(deals_last=deals_source)
 
-    # Logger.debug(msg=f'deals_last:\n{deals_source}')
     await deals_answer_message(
         deals_source=deals_source, message=message, state=state
     )
@@ -431,7 +418,6 @@ async def operations_coro(state: FSMContext):
     else:
         await state.update_data(operations_last=operations_last)
 
-    # Logger.debug(msg=f'operations_last:\n{operations_last}')
     create_task(coro=operations_task(state=state), name='operations_refresh')
 
 
@@ -447,5 +433,4 @@ async def rates_coro(state: FSMContext):
     else:
         await state.update_data(rates_last=rates_last)
 
-    # Logger.debug(msg=f'rates_last:\n{rates_last}')
     create_task(coro=rates_task(state=state), name='rates_refresh')
