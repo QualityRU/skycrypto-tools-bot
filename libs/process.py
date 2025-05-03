@@ -103,6 +103,9 @@ async def lots_answer_message(message: Message, state: FSMContext):
         iid = broker_lot.get('id')
         lots_ids = await skycrypto.lot_id([tokens], iid=iid)
 
+        if lots_ids.get('status') == 'Error':
+            continue
+
         a, b = config.SKYCRYPTO_REFRESH_GET_LOTS_MARKET
         time_sleep = uniform(a=a, b=b)
         await sleep(time_sleep)
@@ -126,6 +129,10 @@ async def lots_answer_message(message: Message, state: FSMContext):
                 limit=15,
                 offset=0,
             )
+
+            if lots_market.get('status') == 'Error':
+                continue
+
             lots_market = lots_market[0].get('data')
 
             if lots_market:
@@ -150,6 +157,9 @@ async def lots_answer_message(message: Message, state: FSMContext):
             continue
         iid = broker_lot.get('id')
         lots_ids = await skycrypto.lot_id([tokens], iid=iid)
+
+        if lots_ids.get('status') == 'Error':
+            continue
 
         for lot in lots_ids:
             bank = lot.get('broker').get('name')
