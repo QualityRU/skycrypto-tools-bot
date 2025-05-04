@@ -26,6 +26,7 @@ async def cmd_restakan(message: Message, state: FSMContext):
     auth_data = await state.get_data()
     tokens = [auth_data.get('tokens')]
     task_lots = auth_data.get('task_lots')
+    await state.update_data(task_lots=False)
 
     if not tokens[0]:
         ReplyKeyboardRemove()
