@@ -57,7 +57,7 @@ async def cmd_restakan(message: Message, state: FSMContext):
         await message.answer(text=msg, reply_markup=keyboard_markup)
         return
 
-    await state.update_data(task_lots=True)
+    await state.update_data(task_lots=False)
     msg = """🔄🚫 Cканирование стаканов по BTC и USDT остановлено!
 
 Вернуться в главное меню: <b>/menu</b>"""
