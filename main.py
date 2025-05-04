@@ -31,7 +31,7 @@ async def set_bot_commands(bot: Bot) -> None:
 async def main():
     bot = Bot(
         token=config.TELEGRAM_TOKEN,
-        default=DefaultBotProperties(parse_mode='HTML'),
+        default=DefaultBotProperties(parse_mode=config.PARSE_MODE),
     )
     dp = Dispatcher(storage=MemoryStorage())
     include_router(dp=dp)

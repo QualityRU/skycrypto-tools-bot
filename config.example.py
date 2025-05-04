@@ -1,9 +1,7 @@
 VERSION = '0.3.05 pre-beta'
 PARSE_MODE = 'HTML'  # MarkdownV2, HTML, None
 """------------------------------------------------------------------------"""
-# SKY TOOLS BOT
 TELEGRAM_TOKEN = ''
-
 """------------------------------------------------------------------------"""
 ADMIN_ID = 1234
 ACCESS_IDS = (ADMIN_ID,)
@@ -94,8 +92,4 @@ LOG_FORMAT = (
     '[ LINE:%(lineno)-4s] %(levelname)s %(message)s'
 )
 """------------------------------------------------------------------------"""
-USER_AGENT = (
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-    'AppleWebKit/537.36 (KHTML, like Gecko) '
-    'Chrome/114.0.0.0 Safari/537.36'
-)
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
