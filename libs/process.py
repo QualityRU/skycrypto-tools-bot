@@ -86,7 +86,7 @@ async def lots_answer_message(message: Message, state: FSMContext):
     if not auth_state.get('loggined'):
         return
 
-    tokens = await state.get_data().get('tokens')
+    tokens = auth_state.get('tokens')
     lots_my = auth_state.get('lots_my')
     lots_market_massive = list()
 
@@ -98,7 +98,8 @@ async def lots_answer_message(message: Message, state: FSMContext):
         return
 
     for broker_lot in lots_my[1].get('data'):
-        tokens = await state.get_data().get('tokens')
+        auth_state = await state.get_data()
+        tokens = auth_state.get('tokens')
         iid = broker_lot.get('id')
         lots_ids = await skycrypto.lot_id([tokens], iid=iid)
 
@@ -110,7 +111,8 @@ async def lots_answer_message(message: Message, state: FSMContext):
         await sleep(time_sleep)
 
         for lot in lots_ids:
-            tokens = await state.get_data().get('tokens')
+            auth_state = await state.get_data()
+            tokens = auth_state.get('tokens')
             is_active = lot.get('is_active')
             broker = lot.get('broker').get('name')
             symbol = lot.get('symbol')
@@ -155,7 +157,8 @@ async def lots_answer_message(message: Message, state: FSMContext):
     for broker_lot in lots_my[1].get('data'):
         if not broker_lot:
             continue
-        tokens = await state.get_data().get('tokens')
+        auth_state = await state.get_data()
+        tokens = auth_state.get('tokens')
         iid = broker_lot.get('id')
         lots_ids = await skycrypto.lot_id([tokens], iid=iid)
 
@@ -256,8 +259,9 @@ async def lots_answer_message(message: Message, state: FSMContext):
                 rate_new = rate_m_final
                 put = '👆'
                 put2 = '🟢'
-            
-            tokens = await state.get_data().get('tokens')
+
+            auth_state = await state.get_data()
+            tokens = auth_state.get('tokens')
             result = await skycrypto.lots_post(
                 tokens=[tokens], id_lot=id_lot, rate=rate_new, details=details
             )
@@ -306,7 +310,7 @@ async def lots_answer_message(message: Message, state: FSMContext):
 
 async def lots_coro(message: Message, state: FSMContext):
     auth_state = await state.get_data()
-    tokens = await state.get_data().get('tokens')
+    tokens = auth_state.get('tokens')
 
     if not auth_state.get('loggined'):
         return
